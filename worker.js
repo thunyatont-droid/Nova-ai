@@ -14,7 +14,7 @@ export default {
         }
 
         const response = await fetch(
-          "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
+          "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent",
           {
             method: "POST",
             headers: {
@@ -22,10 +22,10 @@ export default {
               "x-goog-api-key": env.GEMINI_API_KEY
             },
             body: JSON.stringify({
-              systemInstruction: {
+              system_instruction: {
                 parts: [
                   {
-                    text: "คุณคือ NOVA AI ผู้ช่วย AI ที่ตอบภาษาไทยอย่างเป็นธรรมชาติ"
+                    text: "คุณคือ NOVA AI ผู้ช่วย AI ส่วนตัว ตอบภาษาไทยอย่างเป็นธรรมชาติ กระชับและเข้าใจง่าย"
                   }
                 ]
               },

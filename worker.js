@@ -6,24 +6,37 @@ export default {
       try {
         const body = await request.json();
 
+        if (!body.message) {
+          return Response.json(
+            { error: "กรุณาใส่ข้อความ" },
+            { status: 400 }
+          );
+        }
+
         const response = await fetch(
-          "https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions",
+          "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
           {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              "Authorization": `Bearer ${env.QWEN_API_KEY}`
+              "x-goog-api-key": env.GEMINI_API_KEY
             },
             body: JSON.stringify({
-              model: "qwen-plus",
-              messages: [
-                {
-                  role: "system",
-                  content: "คุณคือ NOVA AI ผู้ช่วย AI ที่ตอบภาษาไทยอย่างเป็นธรรมชาติ"
-                },
+              systemInstruction: {
+                parts: [
+                  {
+                    text: "คุณคือ NOVA AI ผู้ช่วย AI ที่ตอบภาษาไทยอย่างเป็นธรรมชาติ"
+                  }
+                ]
+              },
+              contents: [
                 {
                   role: "user",
-                  content: body.message
+                  parts: [
+                    {
+                      text: body.message
+                    }
+                  ]
                 }
               ]
             })
@@ -34,14 +47,19 @@ export default {
 
         if (!response.ok) {
           return Response.json(
-            { error: data?.message || "เรียก AI ไม่สำเร็จ" },
+            {
+              error: data?.error?.message || "Gemini API เรียกไม่สำเร็จ"
+            },
             { status: response.status }
           );
         }
 
-        return Response.json({
-          reply: data.choices?.[0]?.message?.content || "ไม่มีคำตอบ"
-        });
+        const reply =
+          data?.candidates?.[0]?.content?.parts
+            ?.map(part => part.text || "")
+            .join("") || "Gemini ไม่มีคำตอบ";
+
+        return Response.json({ reply });
 
       } catch (error) {
         return Response.json(
